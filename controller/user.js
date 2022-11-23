@@ -6,67 +6,66 @@ import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 dotenv.config()
+// const stripe = new Stripe(config.SECRET_KEY);
 
-
-const stripe = new Stripe(config.SECRET_KEY);
+export const getUser = async (req, res) => {
+  let response = await UserModel.find({})
+  res.status(201).json({ user: response });
+}
 export const signup = async (req, res) => {
 
   const { name, email, password } = req.body;
   try {
     if (await UserModel.findOne({ email: email }).exec()) {
-      console.log("existed")
       res.status(201).json({ message: false, error: 'Already Exists' });
     }
     else {
       await UserModel.create({ name, email, password });
-      console.log('rr: ', config.get('EMAIL')),
-        UserModel.find({ email: email }, function (err, docs) {
-          var transporter = nodemailer.createTransport({
+      UserModel.find({ email: email }, function (err, docs) {
+        var transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 587,
+          auth: {
+            user: config.get('EMAIL'),
+            pass: config.get('PASSWORD')
+          }
+        });
+        var mailOptions = {
+          from: {
+            name: 'no-reply',
+            address: config.get('EMAIL')
+          },
+          to: email,
+          subject: "Account Created",
 
-
-            host: 'smtp.gmail.com',
-            port: 587,
-            auth: {
-              user: config.get('EMAIL'),
-              pass: config.get('PASSWORD')
-            }
-          });
-          var mailOptions = {
-            from: {
-              name: 'no-reply',
-              address: config.get('EMAIL')
-            },
-            to: email,
-            subject: "Account Created",
-
-            html: `<h1>Thank you for signing up with us </h1><p>\
+          html: `<h1>Thank you for signing up with us </h1><p>\
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.\
                   </p>`
-          };
+        };
 
-          try {
-            transporter.sendMail(mailOptions, async function (error, info) {
-              if (error) {
-                console.log("not sent: ", error);
+        try {
+          transporter.sendMail(mailOptions, async function (error, info) {
+            if (error) {
+              console.log("not sent: ", error);
+            }
+          });
+          jwt.sign(
+            { id: docs[0].id },
+            process.env.JWT_KEY,
+            { expiresIn: "3h" },
+            (err, token) => {
+              try {
+                return res.status(201).json({ message: true, token, user: docs[0] });
+              } catch (error) {
+                return res.status(202).json({ message: error.message });
               }
-            });
-            jwt.sign(
-              { id: docs[0].id },
-              "secretKey",
-              { expiresIn: "1h" },
-              (err, token) => {
-                try {
-                  res.status(201).json({ message: true, token, user: docs[0] });
-                } catch (error) {
-                  res.status(202).json({ message: error.message });
-                }
-              }
-            )
-          } catch (error) {
-            res.status(201).json({ message: false, error: error.message });
+            }
+          )
+        } catch (error) {
+          res.status(201).json({ message: false, error: error.message });
 
-          }
-        })
+        }
+      })
     }
   }
   catch (err) {
@@ -89,8 +88,8 @@ export const login = async (req, res) => {
 
     jwt.sign(
       { id: user._id, email: user.email },
-      "secretKey",
-      { expiresIn: "1h" },
+      process.env.JWT_KEY,
+      { expiresIn: "3h" },
       (err, token) => {
         try {
           res.status(201).json({ message: true, token, user });
@@ -127,7 +126,6 @@ export const forgotPassword = async (req, res) => {
     const expire = Date.now() + 3600000;
     const resetCode = 1 + Math.floor(Math.random() * 10000);
 
-    console.log('eemail: ', process.env.EMAIL)
     var mailOptions = {
       from: {
         name: 'password-reset',
@@ -177,38 +175,36 @@ export const resetPassword = async (req, res, next) => {
   }
 }
 
-export const payment = async (req, res) => {
-  const customer = await stripe.customers
-    .create({
-      email: req.body.user.email,
-      name: req.body.user.name
-    })
+// export const payment = async (req, res) => {
+//   const customer = await stripe.customers
+//     .create({
+//       email: req.body.user.email,
+//       name: req.body.user.name
+//     })
 
-  const line_items = req.body.cartItems.map((item) => {
-    return {
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: item.name,
-          metadata: {
-            id: item.id,
-          },
-        },
-        unit_amount: item.price * 100,
-      },
-      quantity: item.quantity,
-    };
-  });
+//   const line_items = req.body.cartItems.map((item) => {
+//     return {
+//       price_data: {
+//         currency: "usd",
+//         product_data: {
+//           name: item.name,
+//           metadata: {
+//             id: item.id,
+//           },
+//         },
+//         unit_amount: item.price * 100,
+//       },
+//       quantity: item.quantity,
+//     };
+//   });
 
-  const session = await stripe.checkout.sessions.create({
-    customer: customer.id,
-    payment_method_types: ["card"],
-    line_items,
-    mode: "payment",
-    success_url: `${process.env.CLIENT_URL}/success`,
-    cancel_url: `${process.env.CLIENT_URL}/checkout`,
-  })
-  res.status(202).json({ url: session.url });
-};
-
-// module.exports = { signup, payment }
+//   const session = await stripe.checkout.sessions.create({
+//     customer: customer.id,
+//     payment_method_types: ["card"],
+//     line_items,
+//     mode: "payment",
+//     success_url: `${process.env.CLIENT_URL}/success`,
+//     cancel_url: `${process.env.CLIENT_URL}/checkout`,
+//   })
+//   res.status(202).json({ url: session.url });
+// };
