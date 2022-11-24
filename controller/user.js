@@ -81,6 +81,7 @@ export const login = async (req, res) => {
     if (!user) {
       res.status(201).json({ message: false, error: 'Invalid user' });
     }
+    console.log('password', password)
     const validate = await user.isValidPassword(password)
     if (!validate) {
       res.status(201).json({ message: false, error: 'Wrong password' });
@@ -101,7 +102,7 @@ export const login = async (req, res) => {
   }
 
   catch (err) {
-    console.log(err.message)
+    console.log('err: ',err.message)
   }
 }
 

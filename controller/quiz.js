@@ -46,11 +46,22 @@ export const createQuiz = async (req, res) => {
 }
 
 export const updateQuiz = async (req, res) => {
-  let { status, results } = req.body
-  let quiz = await QuizModel.findByIdAndUpdate({
-    _id: req.params.qid
-  }, { status, results }, { new: true })
-  res.status(202).json({ message: true, quiz });
+  let { index } = req.body
+  try {
+    let quiz = await QuizModel.findById({
+      _id: req.params.qid
+    })
+    if (!quiz) res.status(202).json({ message: false, error: 'Quiz not found' });
+    let { results, status } = quiz
+    results[index] = 'pass'
+    status[index] = 'completed'
+    quiz = await QuizModel.findByIdAndUpdate({
+      _id: req.params.qid
+    }, { status, results }, { new: true })
+    res.status(202).json({ message: true, quiz });
+  } catch (err) {
+    res.status(202).json({ message: false, error: 'err.message' });
+  }
 }
 
 export const courseQuiz = async (req, res) => {
