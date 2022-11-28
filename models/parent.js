@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 
-const UserSchema = new mongoose.Schema({
+const ParentSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -18,18 +18,17 @@ const UserSchema = new mongoose.Schema({
 
 })
 
-UserSchema.pre('save', async function (next) {
+ParentSchema.pre('save', async function (next) {
   const user = this
   const hash = await bcrypt.hash(user.password, 10)
   user.password = hash
 })
 
-UserSchema.methods.isValidPassword = async function (password) {
+ParentSchema.methods.isValidPassword = async function (password) {
   const user = this
-  console.log('uu: ', user)
   const compare = await bcrypt.compare(password, user.password)
   return compare
 }
-const UserModel = mongoose.model('user', UserSchema, 'Users')
+const ParentModel = mongoose.model('parent', ParentSchema, 'Parents')
 
-export default UserModel
+export default ParentModel

@@ -1,8 +1,5 @@
-import config from 'config';
 import QuizModel from '../models/quiz.js'
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv'
-import jwt from 'jsonwebtoken'
 dotenv.config()
 
 export const getQuizes = async (req, res) => {
@@ -21,7 +18,7 @@ export const getQuiz = async (req, res) => {
 
 export const getUserQuizes = async (req, res) => {
 
-  let quizes = await QuizModel.find({ user: req.verified.user.id }).populate('user')
+  let quizes = await QuizModel.find({ child: req.params.childId }).populate('user')
   if (quizes.length) {
     return res.status(202).json({ message: true, quizes });
   }
@@ -30,18 +27,18 @@ export const getUserQuizes = async (req, res) => {
 
 export const createQuiz = async (req, res) => {
   let results = [], status = []
-  let { course } = req.body;
+  let { course, child } = req.body;
 
   for (var i = 0; i < course.items; i++) {
     results[i] = null
     status[i] = 'unattemped'
   }
 
-  let quiz = await QuizModel.find({ course: course.title, user: req.verified.id })
+  let quiz = await QuizModel.find({ course: course.title, child })
   if (quiz.length) {
     return res.status(202).json({ message: false, error: 'Quiz already created' });
   }
-  quiz = await QuizModel.create({ course: course.title, user: req.verified.id, status, results })
+  quiz = await QuizModel.create({ course: course.title, child, status, results })
   return res.status(202).json({ message: true, quiz });
 }
 
@@ -66,10 +63,9 @@ export const updateQuiz = async (req, res) => {
 
 export const courseQuiz = async (req, res) => {
   let { title } = req.body
-  let quizes = await QuizModel.find({ course: title, user: req.verified.id })
+  let quizes = await QuizModel.find({ course: title, child: req.params.childId })
   if (quizes.length) {
     return res.status(202).json({ message: true, quizes });
   }
-
   return res.status(202).json({ message: false, error: 'No Quiz found' });
 }

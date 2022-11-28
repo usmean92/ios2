@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import './service/db.js'
 
 const PORT = process.env.PORT || 8000;
-import UserRoutes from './routes/user.js'
+import ParentRoutes from './routes/parent.js'
+import ChildRoutes from './routes/child.js'
 import QuizRoutes from './routes/quiz.js'
 
 
@@ -14,7 +15,8 @@ app.use(cors())
 dotenv.config()
 app.use(bodyParser.json({ limit: "20mb", extended: true }))
 app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }))
-app.use('/user', UserRoutes)
+app.use('/parent', ParentRoutes)
+app.use('/child', ChildRoutes)
 app.use('/quiz', QuizRoutes)
 
 app.listen(PORT, function (error) {

@@ -1,27 +1,29 @@
 import Stripe from 'stripe';
 import config from 'config';
-import UserModel from '../models/user.js'
+import ParentModel from '../models/parent.js'
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import ChildSchema from '../models/child.js'
+
 dotenv.config()
 // const stripe = new Stripe(config.SECRET_KEY);
 
-export const getUser = async (req, res) => {
-  let response = await UserModel.find({})
+export const getParents = async (req, res) => {
+  let response = await ParentModel.find({})
   res.status(201).json({ user: response });
 }
 export const signup = async (req, res) => {
 
   const { name, email, password } = req.body;
   try {
-    if (await UserModel.findOne({ email: email }).exec()) {
+    if (await ParentModel.findOne({ email: email }).exec()) {
       res.status(201).json({ message: false, error: 'Already Exists' });
     }
     else {
-      await UserModel.create({ name, email, password });
-      UserModel.find({ email: email }, function (err, docs) {
+      await ParentModel.create({ name, email, password });
+      ParentModel.find({ email: email }, function (err, docs) {
         var transporter = nodemailer.createTransport({
           host: 'smtp.gmail.com',
           port: 587,
@@ -77,11 +79,10 @@ export const login = async (req, res) => {
 
   const { email, password } = req.body;
   try {
-    const user = await UserModel.findOne({ email })
+    const user = await ParentModel.findOne({ email })
     if (!user) {
       res.status(201).json({ message: false, error: 'Invalid user' });
     }
-    console.log('password', password)
     const validate = await user.isValidPassword(password)
     if (!validate) {
       res.status(201).json({ message: false, error: 'Wrong password' });
@@ -102,14 +103,14 @@ export const login = async (req, res) => {
   }
 
   catch (err) {
-    console.log('err: ',err.message)
+    console.log('err: ', err.message)
   }
 }
 
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await UserModel.findOne({ email })
+    const user = await ParentModel.findOne({ email })
 
     if (!user) {
       return res.status(202).json({ message: false, error: 'Such user does not exists' })
@@ -146,7 +147,7 @@ export const forgotPassword = async (req, res) => {
       if (error) {
         return res.status(202).json({ message: false, error: error.message })
       } else {
-        await UserModel.findByIdAndUpdate(user._id, { expires: expire }, { new: true });
+        await ParentModel.findByIdAndUpdate(user._id, { expires: expire }, { new: true });
         return res.status(202).json({ message: true, success: 'Check your email', resetCode })
       }
     });
@@ -160,15 +161,33 @@ export const resetPassword = async (req, res, next) => {
   try {
     var { email, password } = req.body
 
-    let user = await UserModel.findOne({ email, expires: { $gt: Date.now() } })
+    let user = await ParentModel.findOne({ email, expires: { $gt: Date.now() } })
 
     if (!user) {
       return res.status(202).json({ message: false, error: "Try again sesssion expired!" });
     } else {
       password = await bcrypt.hash(password, 10)
-      user = await UserModel.findByIdAndUpdate({ _id: user._id }, { password, expires: '' }, { new: true })
+      user = await ParentModel.findByIdAndUpdate({ _id: user._id }, { password, expires: '' }, { new: true })
       return res.status(202).json({ message: true, success: 'Password reset successfully.' })
     }
+
+  } catch (error) {
+    return res.status(202).json({ message: false, error: error.message })
+
+  }
+}
+
+export const fetchChildren = async (req, res, next) => {
+  try {
+    console.log('req.verified.id: ', req.verified.id)
+    const pid = req.verified.id
+    const children = await ChildSchema.find({ parent: pid })
+    if (children.length==0) {
+      console.log('child: ', children)
+      return res.status(202).json({ message: false, error: 'No children registered yet' })
+    }
+
+    return res.status(202).json({ message: true, children })
 
   } catch (error) {
     return res.status(202).json({ message: false, error: error.message })

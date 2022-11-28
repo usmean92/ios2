@@ -12,9 +12,9 @@ const QuizSchema = new mongoose.Schema({
   results: {
     type: Array,
   },
-  user: {
+  child: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: 'child',
     required: true
   }
 

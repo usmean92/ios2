@@ -9,6 +9,6 @@ router.get('/quiz/:qid', getQuiz)
 router.get('/quizes', getUserQuizes)
 router.post('/create', createQuiz)
 router.post('/update/:qid', updateQuiz)
-router.post('/course', courseQuiz)
+router.post('/course/:childId', courseQuiz)
 
 export default router;

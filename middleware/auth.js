@@ -8,6 +8,7 @@ export const verifyToken = async (req, res, next) => {
     let token = authHeader.split(' ')[1];
     let verified = jwt.verify(token, process.env.JWT_KEY, (err, verifiedJwt) => {
       if (err) {
+        console.log('err: ', err.message)
         return false
       } else {
         return (verifiedJwt)
