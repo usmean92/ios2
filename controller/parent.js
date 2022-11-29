@@ -179,11 +179,9 @@ export const resetPassword = async (req, res, next) => {
 
 export const fetchChildren = async (req, res, next) => {
   try {
-    console.log('req.verified.id: ', req.verified.id)
     const pid = req.verified.id
     const children = await ChildSchema.find({ parent: pid })
-    if (children.length==0) {
-      console.log('child: ', children)
+    if (children.length == 0) {
       return res.status(202).json({ message: false, error: 'No children registered yet' })
     }
 
