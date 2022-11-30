@@ -51,8 +51,12 @@ export const signup = async (req, res) => {
               console.log("not sent: ", error);
             }
           });
+          console.log('docs: ', docs[0].id, '\ndd: ', docs[0])
           jwt.sign(
-            { id: docs[0].id },
+            {
+              id: docs[0].id,
+              subscribed: docs[0].subscribed
+            },
             process.env.JWT_KEY,
             { expiresIn: "3h" },
             (err, token) => {
@@ -89,7 +93,10 @@ export const login = async (req, res) => {
     }
 
     jwt.sign(
-      { id: user._id, email: user.email },
+      {
+        id: user.id,
+        subscribed: user.subscribed
+      },
       process.env.JWT_KEY,
       { expiresIn: "3h" },
       (err, token) => {

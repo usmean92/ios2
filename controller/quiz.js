@@ -28,6 +28,7 @@ export const getUserQuizes = async (req, res) => {
 export const createQuiz = async (req, res) => {
   let results = [], status = []
   let { course, child } = req.body;
+  console.log('item: ', course)
 
   for (var i = 0; i < course.items; i++) {
     results[i] = null
@@ -44,6 +45,7 @@ export const createQuiz = async (req, res) => {
 
 export const updateQuiz = async (req, res) => {
   let { index } = req.body
+  console.log('id: ', req.params.qid)
   try {
     let quiz = await QuizModel.findById({
       _id: req.params.qid
@@ -57,7 +59,7 @@ export const updateQuiz = async (req, res) => {
     }, { status, results }, { new: true })
     res.status(202).json({ message: true, quiz });
   } catch (err) {
-    res.status(202).json({ message: false, error: 'err.message' });
+    res.status(202).json({ message: false, error: err.message });
   }
 }
 

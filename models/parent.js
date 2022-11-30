@@ -14,6 +14,14 @@ const ParentSchema = new mongoose.Schema({
   },
   expires: {
     type: String
+  },
+  subscribed: {
+    type: Boolean,
+    default: false
+  },
+  amount_paid: {
+    type: Number,
+    default: 0
   }
 
 })
