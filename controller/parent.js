@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken'
 import ChildSchema from '../models/child.js'
 
 dotenv.config()
-// const stripe = new Stripe(config.SECRET_KEY);
+const stripe = new Stripe(config.SECRET_KEY);
 
 export const getParents = async (req, res) => {
   let response = await ParentModel.find({})
@@ -55,6 +55,7 @@ export const signup = async (req, res) => {
           jwt.sign(
             {
               id: docs[0].id,
+              email: docs[0].email,
               subscribed: docs[0].subscribed
             },
             process.env.JWT_KEY,
@@ -95,6 +96,7 @@ export const login = async (req, res) => {
     jwt.sign(
       {
         id: user.id,
+        email: user.email,
         subscribed: user.subscribed
       },
       process.env.JWT_KEY,
@@ -200,36 +202,48 @@ export const fetchChildren = async (req, res, next) => {
   }
 }
 
-// export const payment = async (req, res) => {
-//   const customer = await stripe.customers
-//     .create({
-//       email: req.body.user.email,
-//       name: req.body.user.name
-//     })
+export const payment = async (req, res) => {
+  const customer = await stripe.customers
+    .create({
+      email: req.verified.email
+    })
 
-//   const line_items = req.body.cartItems.map((item) => {
-//     return {
-//       price_data: {
-//         currency: "usd",
-//         product_data: {
-//           name: item.name,
-//           metadata: {
-//             id: item.id,
-//           },
-//         },
-//         unit_amount: item.price * 100,
-//       },
-//       quantity: item.quantity,
-//     };
-//   });
+  const line_items = [{
+    price_data: {
+      currency: "usd",
+      product_data: {
+        name: 'poems',
 
-//   const session = await stripe.checkout.sessions.create({
-//     customer: customer.id,
-//     payment_method_types: ["card"],
-//     line_items,
-//     mode: "payment",
-//     success_url: `${process.env.CLIENT_URL}/success`,
-//     cancel_url: `${process.env.CLIENT_URL}/checkout`,
-//   })
-//   res.status(202).json({ url: session.url });
-// };
+      },
+      unit_amount: 500,
+    },
+    quantity: 5,
+  }];
+
+  const session = await stripe.checkout.sessions.create({
+    customer: customer.id,
+    payment_method_types: ["card"],
+    line_items,
+    mode: "payment",
+    success_url: `${process.env.CLIENT_URL}/subscription`,
+    cancel_url: `${process.env.CLIENT_URL}/subscription`,
+  })
+  let user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { subscribed: true }, { new: true })
+  jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      subscribed: user.subscribed
+    },
+    process.env.JWT_KEY,
+    { expiresIn: "3h" },
+    (err, token) => {
+      try {
+        return res.status(201).json({ message: true, token, url: session.url });
+      } catch (error) {
+        return res.status(202).json({ message: false, error: error.message });
+      }
+    }
+  )
+
+};

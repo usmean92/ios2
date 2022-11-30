@@ -21,7 +21,6 @@ export const register = async (req, res) => {
       return res.status(202).json({ message: false, error: 'Sorry! You reached the limit to register kids' })
     }
     let child = await ChildModel.create(data)
-    console.log('child: ', child)
     return res.status(202).json({ message: true, child })
 
   } catch (error) {
@@ -29,20 +28,25 @@ export const register = async (req, res) => {
   }
 }
 
-export const readPoems = async (req, res) => {
+export const deleteChild = async (req, res) => {
 
-  const filename = './data/poems.txt'
-
+  const { cid } = req.params
   try {
-    const contents = await fsPromises.readFile(filename, 'utf-8');
-
-    const poems = contents.split(/\r?\n/);
-
-    return res.status(202).json({ message: true, poems })
-
+    await ChildModel.findByIdAndDelete({ _id: cid })
+    return res.status(202).json({ message: true, success: 'Child Deleted' })
   } catch (err) {
     return res.status(202).json({ message: false, error: error.message })
   }
+}
 
+export const readPoems = async (req, res) => {
 
+  const filename = './data/poems.txt'
+  try {
+    const contents = await fsPromises.readFile(filename, 'utf-8');
+    const poems = contents.split(/\r?\n/);
+    return res.status(202).json({ message: true, poems })
+  } catch (err) {
+    return res.status(202).json({ message: false, error: error.message })
+  }
 }
