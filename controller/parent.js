@@ -132,7 +132,8 @@ export const login = async (req, res) => {
 export const updateProfile = async (req, res) => {
   const { name, password } = req.body.data
   try {
-    const user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { name, password }, { new: true })
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { name, password: hashedPassword }, { new: true })
     res.status(201).json({ message: true, user });
   } catch (error) {
     return res.status(202).json({ message: false, error: error.message })
