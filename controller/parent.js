@@ -12,7 +12,20 @@ const stripe = new Stripe(config.SECRET_KEY);
 
 export const getParents = async (req, res) => {
   let response = await ParentModel.find({})
-  res.status(201).json({ user: response });
+  return res.status(201).json({ user: response });
+}
+
+export const getParent = async (req, res) => {
+  try {
+    let user = await ParentModel.findById({ _id: req.verified.id })
+    if (user) return res.status(201).json({ user });
+
+    return res.status(201).json({ message: false, error: 'No user found' });
+
+  } catch (error) {
+    return res.status(201).json({ message: false, error: error.message });
+
+  }
 }
 export const signup = async (req, res) => {
 
@@ -116,6 +129,16 @@ export const login = async (req, res) => {
   }
 }
 
+export const updateProfile = async (req, res) => {
+  const { name, password } = req.body.data
+  try {
+    const user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { name, password }, { new: true })
+    res.status(201).json({ message: true, user });
+  } catch (error) {
+    return res.status(202).json({ message: false, error: error.message })
+  }
+}
+
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
@@ -182,7 +205,6 @@ export const resetPassword = async (req, res, next) => {
 
   } catch (error) {
     return res.status(202).json({ message: false, error: error.message })
-
   }
 }
 
@@ -228,7 +250,7 @@ export const payment = async (req, res) => {
     success_url: `${process.env.CLIENT_URL}/subscription`,
     cancel_url: `${process.env.CLIENT_URL}/subscription`,
   })
-  let user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { subscribed: true }, { new: true })
+  let user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { subscribed: true, amount_paid: 500 }, { new: true })
   jwt.sign(
     {
       id: user.id,
