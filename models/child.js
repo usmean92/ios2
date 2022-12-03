@@ -24,7 +24,7 @@ const ChildSchema = new mongoose.Schema({
     required: true
   }
 
-})
+}, { timestamps: true })
 const ChildModel = mongoose.model('child', ChildSchema, 'Childs')
 
 export default ChildModel

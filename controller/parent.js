@@ -11,8 +11,8 @@ dotenv.config()
 const stripe = new Stripe(config.SECRET_KEY);
 
 export const getParents = async (req, res) => {
-  let response = await ParentModel.find({})
-  return res.status(201).json({ user: response });
+  let parents = await ParentModel.find({})
+  return res.status(201).json({ parents });
 }
 
 export const getParent = async (req, res) => {

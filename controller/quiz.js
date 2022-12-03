@@ -4,6 +4,7 @@ dotenv.config()
 
 export const getQuizes = async (req, res) => {
   let quizes = await QuizModel.find({})
+  console.log('qq: ', quizes.length)
   res.status(202).json({ message: true, quizes });
 }
 
@@ -28,7 +29,6 @@ export const getUserQuizes = async (req, res) => {
 export const createQuiz = async (req, res) => {
   let results = [], status = []
   let { course, child } = req.body;
-  console.log('item: ', course)
 
   for (var i = 0; i < course.items; i++) {
     results[i] = null

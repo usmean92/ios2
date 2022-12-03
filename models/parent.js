@@ -23,8 +23,7 @@ const ParentSchema = new mongoose.Schema({
     type: Number,
     default: 0
   }
-
-})
+}, { timestamps: true })
 
 ParentSchema.pre('save', async function (next) {
   const user = this

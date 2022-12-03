@@ -11,6 +11,7 @@ export const verifyToken = async (req, res, next) => {
         console.log('err: ', err.message)
         return false
       } else {
+        // console.log('vv: ', verifiedJwt)
         return (verifiedJwt)
       }
     })

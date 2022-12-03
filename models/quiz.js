@@ -18,7 +18,7 @@ const QuizSchema = new mongoose.Schema({
     required: true
   }
 
-})
+}, { timestamps: true })
 const QuizModel = mongoose.model('quiz', QuizSchema, 'Quizes')
 
 export default QuizModel
