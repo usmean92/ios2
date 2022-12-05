@@ -3,8 +3,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export const getQuizes = async (req, res) => {
-  let quizes = await QuizModel.find({})
-  console.log('qq: ', quizes.length)
+  let quizes = await QuizModel.find({}).populate('child')
   res.status(202).json({ message: true, quizes });
 }
 
@@ -14,6 +13,12 @@ export const getQuiz = async (req, res) => {
     return res.status(202).json({ message: true, quiz });
   }
   return res.status(202).json({ message: false, error: 'No quiz found' });
+
+}
+
+export const deleteAllQuizes = async (req, res) => {
+  let quizes = await QuizModel.deleteMany({})
+  return res.status(202).json({ message: true, quizes });
 
 }
 
@@ -45,7 +50,6 @@ export const createQuiz = async (req, res) => {
 
 export const updateQuiz = async (req, res) => {
   let { index } = req.body
-  console.log('id: ', req.params.qid)
   try {
     let quiz = await QuizModel.findById({
       _id: req.params.qid

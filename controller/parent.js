@@ -17,6 +17,10 @@ export const getParents = async (req, res) => {
 
 export const getParent = async (req, res) => {
   try {
+    if (req.verified === false) {
+      return res.status(202).json({ message: false, error: 'Session Expired Login Again!' })
+
+    }
     let user = await ParentModel.findById({ _id: req.verified.id })
     if (user) return res.status(201).json({ user });
 
@@ -64,7 +68,6 @@ export const signup = async (req, res) => {
               console.log("not sent: ", error);
             }
           });
-          console.log('docs: ', docs[0].id, '\ndd: ', docs[0])
           jwt.sign(
             {
               id: docs[0].id,
@@ -132,6 +135,10 @@ export const login = async (req, res) => {
 export const updateProfile = async (req, res) => {
   const { name, password } = req.body.data
   try {
+    if (req.verified === false) {
+      return res.status(202).json({ message: false, error: 'Session Expired Login Again!' })
+
+    }
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await ParentModel.findByIdAndUpdate({ _id: req.verified.id }, { name, password: hashedPassword }, { new: true })
     res.status(201).json({ message: true, user });
@@ -212,6 +219,10 @@ export const resetPassword = async (req, res, next) => {
 export const fetchChildren = async (req, res, next) => {
   try {
     const pid = req.verified.id
+    if (req.verified === false) {
+      return res.status(202).json({ message: false, error: 'Session Expired Login Again!' })
+
+    }
     const children = await ChildSchema.find({ parent: pid })
     if (children.length == 0) {
       return res.status(202).json({ message: false, error: 'No children registered yet' })

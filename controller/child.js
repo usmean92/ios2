@@ -1,8 +1,9 @@
 import config from 'config';
 import dotenv from 'dotenv'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+
 import ChildModel from '../models/child.js'
+import QuizModel from '../models/quiz.js'
+
 import { readFileSync, promises as fsPromises } from 'fs';
 
 
@@ -47,6 +48,33 @@ export const readPoems = async (req, res) => {
     const poems = contents.split(/\r?\n/);
     return res.status(202).json({ message: true, poems })
   } catch (err) {
+    return res.status(202).json({ message: false, error: error.message })
+  }
+}
+
+export const getReport = async (req, res) => {
+  let cid = req.body.childId
+  try {
+
+    let quizes = await QuizModel.find({ child: cid }).populate('child')
+    let stats = []
+    quizes.map((quiz) => {
+      let unattemped = 0, attempted = 0;
+
+      quiz.results.map((item) => {
+        if (item === null) {
+          unattemped++
+        } else {
+          attempted++
+        }
+      })
+      let percentage = attempted * 100 / (attempted + unattemped)
+      stats.push({ course: quiz.course, unattemped, attempted, percentage })
+    })
+    ('child: ', quizes[0].child)
+    return res.status(202).json({ message: true, report: stats, child: quizes[0].child })
+
+  } catch (error) {
     return res.status(202).json({ message: false, error: error.message })
   }
 }

@@ -1,9 +1,10 @@
 import express from 'express';
-import { getQuizes, getQuiz, getUserQuizes, createQuiz, updateQuiz, courseQuiz } from '../controller/quiz.js'
+import { getQuizes, getQuiz, getUserQuizes, createQuiz, updateQuiz, courseQuiz, deleteAllQuizes } from '../controller/quiz.js'
 import { verifyToken } from '../middleware/auth.js'
 
 const router = express.Router();
 router.get('/', getQuizes)
+router.get('/delete', deleteAllQuizes)
 router.use(verifyToken)
 router.get('/quiz/:qid', getQuiz)
 router.get('/quizes', getUserQuizes)

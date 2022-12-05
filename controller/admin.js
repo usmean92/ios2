@@ -22,7 +22,6 @@ export const deleteParent = async (req, res) => {
 
   childs.map(async (item, index) => {
     let cc = await QuizModel.deleteMany({ child: item })
-    console.log('gg: ', cc)
   })
   return res.status(201).json({ message: true, success: 'Delete' });
 }
