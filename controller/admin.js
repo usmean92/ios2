@@ -10,7 +10,6 @@ dotenv.config()
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
-  console.log('ff: ', email)
   try {
     if (await AdminModel.findOne({ email: email }).exec()) {
       res.status(201).json({ message: false, error: 'Already Exists' });
@@ -111,6 +110,26 @@ export const fetchChildren = async (req, res, next) => {
 
   } catch (error) {
     return res.status(202).json({ message: false, error: error.message })
+
+  }
+}
+export const getParent = async (req, res) => {
+  const { conversations } = req.body
+  let parents = []
+  let count = 0;
+  try {
+    conversations.map(async (item) => {
+      let parent = await ParentModel.findById({ _id: item.sender })
+      if (parent) {
+        parents.push(parent)
+        count++;
+      }
+      if (count === conversations.length) {
+        return res.status(201).json({ parents });
+      }
+    })
+  } catch (error) {
+    return res.status(201).json({ message: false, error: error.message });
 
   }
 }

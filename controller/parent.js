@@ -19,7 +19,6 @@ export const getParent = async (req, res) => {
   try {
     if (req.verified === false) {
       return res.status(202).json({ message: false, error: 'Session Expired Login Again!' })
-
     }
     let user = await ParentModel.findById({ _id: req.verified.id })
     if (user) return res.status(201).json({ user });
