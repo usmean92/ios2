@@ -71,10 +71,11 @@ export const getReport = async (req, res) => {
       let percentage = attempted * 100 / (attempted + unattemped)
       stats.push({ course: quiz.course, unattemped, attempted, percentage })
     })
-    ('child: ', quizes[0].child)
+
     return res.status(202).json({ message: true, report: stats, child: quizes[0].child })
 
   } catch (error) {
+    console.log('ff: ', error.message)
     return res.status(202).json({ message: false, error: error.message })
   }
 }

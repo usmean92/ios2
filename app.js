@@ -9,7 +9,7 @@ import ParentRoutes from './routes/parent.js'
 import ChildRoutes from './routes/child.js'
 import QuizRoutes from './routes/quiz.js'
 import AdminRoutes from './routes/admin.js'
-
+import ChatRoutes from './routes/chat.js'
 
 
 const app = express()
@@ -21,6 +21,8 @@ app.use('/parent', ParentRoutes)
 app.use('/child', ChildRoutes)
 app.use('/quiz', QuizRoutes)
 app.use('/admin', AdminRoutes)
+app.use('/chat', ChatRoutes)
+
 
 app.listen(PORT, function (error) {
   if (error) throw error

@@ -72,6 +72,7 @@ export const signup = async (req, res) => {
             {
               id: docs[0].id,
               email: docs[0].email,
+              name: docs[0].name,
               subscribed: docs[0].subscribed
             },
             process.env.JWT_KEY,
@@ -113,6 +114,7 @@ export const login = async (req, res) => {
       {
         id: user.id,
         email: user.email,
+        name: user.name,
         subscribed: user.subscribed
       },
       process.env.JWT_KEY,

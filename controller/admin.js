@@ -1,9 +1,83 @@
 import config from 'config';
+import AdminModel from '../models/admin.js'
 import ParentModel from '../models/parent.js'
 import ChildModel from '../models/child.js';
 import QuizModel from '../models/quiz.js';
 import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
 dotenv.config()
+
+
+export const register = async (req, res) => {
+  const { name, email, password } = req.body;
+  console.log('ff: ', email)
+  try {
+    if (await AdminModel.findOne({ email: email }).exec()) {
+      res.status(201).json({ message: false, error: 'Already Exists' });
+    }
+    else {
+      let admin = await AdminModel.create({ name, email, password });
+      res.status(201).json({ message: true, admin });
+    }
+  }
+  catch (err) {
+    console.log(err.message)
+  }
+}
+
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    let admin = await AdminModel.findOne({ email: email })
+    if (!admin)
+      return res.status(201).json({ message: false, error: 'User not found' })
+
+
+    const validate = await admin.isValidPassword(password)
+    if (!validate) {
+      return res.status(201).json({ message: false, error: 'Wrong password' });
+    }
+
+    jwt.sign(
+      {
+        id: admin._id,
+        email: admin.email,
+        name: admin.name,
+      },
+      process.env.JWT_KEY,
+      { expiresIn: "3h" },
+      (err, token) => {
+        try {
+          res.status(201).json({ message: true, token, admin });
+        } catch (error) {
+          res.status(202).json({ message: false, error: error.message });
+        }
+      }
+    )
+    jwt.sign(
+      {
+        id: docs[0].id,
+        email: docs[0].email,
+        name: docs[0].name,
+        subscribed: docs[0].subscribed
+      },
+      process.env.JWT_KEY,
+      { expiresIn: "3h" },
+      (err, token) => {
+        try {
+          return res.status(201).json({ message: true, token, user: docs[0] });
+        } catch (error) {
+          return res.status(202).json({ message: error.message });
+        }
+      }
+    )
+    return res.status(201).json({ message: true, admin });
+  }
+  catch (err) {
+    console.log(err.message)
+  }
+}
 
 export const getStatics = async (req, res) => {
   let parents = await ParentModel.find({})
