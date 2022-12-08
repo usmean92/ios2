@@ -48,30 +48,12 @@ export const login = async (req, res) => {
       { expiresIn: "3h" },
       (err, token) => {
         try {
-          res.status(201).json({ message: true, token, admin });
+          return res.status(201).json({ message: true, token, admin });
         } catch (error) {
-          res.status(202).json({ message: false, error: error.message });
+          return res.status(202).json({ message: false, error: error.message });
         }
       }
     )
-    jwt.sign(
-      {
-        id: docs[0].id,
-        email: docs[0].email,
-        name: docs[0].name,
-        subscribed: docs[0].subscribed
-      },
-      process.env.JWT_KEY,
-      { expiresIn: "3h" },
-      (err, token) => {
-        try {
-          return res.status(201).json({ message: true, token, user: docs[0] });
-        } catch (error) {
-          return res.status(202).json({ message: error.message });
-        }
-      }
-    )
-    return res.status(201).json({ message: true, admin });
   }
   catch (err) {
     console.log(err.message)

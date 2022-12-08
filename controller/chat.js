@@ -38,8 +38,16 @@ export const fetchConversation = async (req, res) => {
   return res.status(202).json({ conversation })
 }
 
-export const deleteConversations = async (req, res) => {
+export const deleteAllConversations = async (req, res) => {
   let conversation = await ChatModel.deleteMany({})
   return res.status(202).json({ conversation })
 }
 
+
+export const deleteConversation = async (req, res) => {
+  let { conversationId } = req.params
+  let conversation = await ChatModel.findByIdAndDelete({ _id: conversationId })
+  if (!conversation) return res.status(202).json({ message: false, error: ' Invalid Conversation' })
+
+  return res.status(202).json({ message: true, success: 'Conversation Deleted' })
+}
