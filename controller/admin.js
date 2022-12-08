@@ -100,7 +100,6 @@ export const fetchChildren = async (req, res, next) => {
 }
 export const getParent = async (req, res) => {
   const { conversations } = req.body
-  console.log('cc: ', conversations)
   let parents = []
   let count = 0;
   try {
