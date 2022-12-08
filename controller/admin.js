@@ -5,6 +5,7 @@ import ChildModel from '../models/child.js';
 import QuizModel from '../models/quiz.js';
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
+import ChatModel from '../models/chat.js';
 dotenv.config()
 
 
@@ -71,13 +72,15 @@ export const getStatics = async (req, res) => {
 
 export const deleteParent = async (req, res) => {
   const { pid } = req.params
-  await ParentModel.findByIdAndDelete({ _id: pid })
+  let ff = await ParentModel.findByIdAndDelete({ _id: pid })
   const childs = await ChildModel.find({ parent: pid })
   await ChildModel.deleteMany({ parent: pid })
 
   childs.map(async (item, index) => {
     let cc = await QuizModel.deleteMany({ child: item })
   })
+
+  let conversation = await ChatModel.deleteOne({ sender: pid })
   return res.status(201).json({ message: true, success: 'Delete' });
 }
 
@@ -97,19 +100,26 @@ export const fetchChildren = async (req, res, next) => {
 }
 export const getParent = async (req, res) => {
   const { conversations } = req.body
+  console.log('cc: ', conversations)
   let parents = []
   let count = 0;
   try {
-    conversations.map(async (item) => {
-      let parent = await ParentModel.findById({ _id: item.sender })
-      if (parent) {
-        parents.push(parent)
-        count++;
-      }
-      if (count === conversations.length) {
-        return res.status(201).json({ parents });
-      }
-    })
+    if (conversations.length) {
+      conversations.map(async (item) => {
+        let parent = await ParentModel.findById({ _id: item.sender })
+        if (parent) {
+          parents.push(parent)
+          count++;
+        }
+        if (count === conversations.length) {
+          return res.status(201).json({ parents });
+        }
+      })
+    }
+    else {
+      return res.status(201).json({ message: false });
+    }
+
   } catch (error) {
     return res.status(201).json({ message: false, error: error.message });
 
