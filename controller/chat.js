@@ -34,9 +34,7 @@ export const createConversation = async (req, res) => {
 export const fetchConversation = async (req, res) => {
   let { senderId, recieverId } = req.body
 
-  console.log('gg: ', recieverId, 'ss: ', senderId)
   let conversation = await ChatModel.find({ $or: [{ sender: senderId }, { reciever: recieverId }] })
-  console.log('fsf: ', conversation)
   return res.status(202).json({ conversation })
 }
 
